@@ -42,6 +42,7 @@ def main(argv=sys.argv):
     workspace = None
     scheme = None
     project = None
+    architecture = None
     skip_validate_bin = None
     while (arg := next(it, None)) is not None:
         if arg == "-workspace":
@@ -50,6 +51,8 @@ def main(argv=sys.argv):
             scheme = next(it, None)
         elif arg == "-project":
             project = next(it, None)
+        elif arg == "-arch":
+            architecture = next(it, None)
         elif arg == "--skip-validate-bin":
             skip_validate_bin = True
         elif "-h" == arg or "--help" == arg or "-help" == arg:
@@ -82,8 +85,10 @@ def main(argv=sys.argv):
 
         workspace = get_workspace()
 
+    arch_option = f"ARCHS='{architecture}'" if architecture else ""
+    print("stuff happening here")
     # find and record build_root for workspace and scheme
-    cmd = f"""xcodebuild -showBuildSettings -workspace '{workspace}' -scheme '{scheme}' 2>/dev/null | grep "\\bBUILD_DIR =" | head -1 | awk -F" = " '{{print $2}}' | tr -d '"' """
+    cmd = f"""xcodebuild -showBuildSettings {arch_option} -workspace '{workspace}' -scheme '{scheme}' 2>/dev/null | grep "\\bBUILD_DIR =" | head -1 | awk -F" = " '{{print $2}}' | tr -d '"' """
     build_dir = subprocess.check_output(cmd, shell=True, universal_newlines=True)
     build_root = os.path.join(build_dir, "../..")
     build_root = os.path.abspath(build_root)
